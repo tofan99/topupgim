@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONE TopUp — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0F172A;--bg2:#1E293B;--bg3:#253047;--border:#334155;--border2:#475569;
+  --primary:#3B82F6;--primary2:#60A5FA;--primary3:rgba(59,130,246,0.12);
+  --gold:#F59E0B;--green:#10B981;--green2:#34D399;--red:#EF4444;--orange:#F97316;--purple:#8B5CF6;
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;--shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── TOP BAR ── */
+.topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:1rem;font-weight:800;color:var(--text);white-space:nowrap;}
+.topbar-logo em{font-style:normal;color:var(--primary);}
+.nav-links{display:flex;gap:3px;}
+.nav-link{font-size:0.75rem;font-weight:500;color:var(--text2);padding:5px 10px;border-radius:7px;text-decoration:none;transition:all .15s;white-space:nowrap;}
+.nav-link:hover,.nav-link.active{color:var(--text);background:var(--bg3);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.live-badge{font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,0.15);color:var(--green2);border:1px solid rgba(16,185,129,0.3);display:flex;align-items:center;gap:5px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green2);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.35);}}
+.btn-sm{font-size:0.72rem;color:var(--text2);text-decoration:none;padding:5px 11px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;background:transparent;transition:all .15s;white-space:nowrap;}
+.btn-sm:hover{color:var(--text);border-color:var(--border2);}
+
+/* ── STAT ROW ── */
+.stat-wrap{max-width:1340px;margin:0 auto;padding:18px 20px 0;}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+@media(max-width:780px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px 15px;}
+.stat-label{font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.stat-val{font-size:1.5rem;font-weight:800;line-height:1;}
+.stat-sub{font-size:0.67rem;color:var(--text3);margin-top:3px;}
+.s-blue{color:var(--primary2);}
+.s-orange{color:var(--orange);}
+.s-green{color:var(--green2);}
+.s-purple{color:#A78BFA;}
+.s-gold{color:var(--gold);}
+
+/* ── MAIN LAYOUT ── */
+.admin-wrap{max-width:1340px;margin:0 auto;padding:16px 20px 60px;display:grid;grid-template-columns:1fr 370px;gap:16px;align-items:start;}
+@media(max-width:1000px){.admin-wrap{grid-template-columns:1fr;}}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.card-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.card-title{font-size:0.86rem;font-weight:700;color:var(--text);}
+.card-sub{font-size:0.68rem;color:var(--text3);margin-top:1px;}
+.card-body{padding:14px 16px;}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:0.63rem;font-weight:700;}
+.badge-pending{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);}
+.badge-paid{background:rgba(59,130,246,0.15);color:var(--primary2);border:1px solid rgba(59,130,246,0.3);}
+.badge-processing{background:rgba(139,92,246,0.15);color:#A78BFA;border:1px solid rgba(139,92,246,0.3);}
+.badge-done{background:rgba(16,185,129,0.15);color:var(--green2);border:1px solid rgba(16,185,129,0.3);}
+.badge-failed{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);}
+.badge-proof{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);cursor:pointer;}
+.badge-proof:hover{background:rgba(245,158,11,0.25);}
+
+/* ── ANTRIAN ── */
+.queue-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 13px;margin-bottom:8px;transition:border .15s;}
+.queue-item:hover{border-color:var(--border2);}
+.queue-item.has-proof{border-left:3px solid var(--gold);}
+.queue-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;flex-wrap:wrap;}
+.queue-order-id{font-family:'Space Grotesk',monospace;font-size:0.7rem;color:var(--text3);}
+.queue-info{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:2px;}
+.queue-sub{font-size:0.7rem;color:var(--text2);line-height:1.5;}
+.queue-voucher-row{display:flex;align-items:center;gap:8px;margin-top:8px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:7px;padding:7px 10px;}
+.queue-voucher-label{font-size:0.62rem;color:var(--text3);font-weight:600;white-space:nowrap;}
+.queue-voucher-code{font-family:'Space Grotesk',monospace;font-size:0.82rem;font-weight:700;color:var(--primary2);flex:1;letter-spacing:.5px;}
+.queue-open-link{font-size:0.7rem;font-weight:700;color:#A78BFA;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.25);border-radius:6px;padding:3px 9px;text-decoration:none;white-space:nowrap;transition:all .15s;}
+.queue-open-link:hover{background:var(--purple);color:#fff;}
+.queue-confirm-btn{width:100%;margin-top:7px;padding:9px;border-radius:8px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--green),#059669);color:#fff;}
+.queue-confirm-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(16,185,129,0.3);}
+.proof-note{margin-top:6px;font-size:0.68rem;color:var(--gold);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:5px 9px;display:flex;align-items:center;gap:5px;}
+
+/* ── ORDER TABLE ── */
+.tbl-wrap{overflow-x:auto;}
+.order-table{width:100%;border-collapse:collapse;min-width:680px;}
+.order-table th{font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.order-table td{padding:9px 10px;font-size:0.76rem;color:var(--text2);border-bottom:1px solid rgba(51,65,85,0.4);vertical-align:middle;}
+.order-table tr:last-child td{border-bottom:none;}
+.order-table tr:hover td{background:rgba(59,130,246,0.03);}
+.oid{font-family:'Space Grotesk',monospace;font-size:0.7rem;color:var(--text3);}
+.ogame{font-weight:600;color:var(--text);font-size:0.78rem;}
+.oamt{font-weight:700;color:var(--primary2);font-size:0.76rem;}
+.oprice{font-weight:600;color:var(--green2);}
+.act-row{display:flex;gap:4px;flex-wrap:wrap;}
+.act-btn{font-size:0.67rem;font-weight:700;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+.act-process{background:var(--primary3);color:var(--primary2);border:1px solid rgba(59,130,246,0.3);}
+.act-process:hover{background:var(--primary);color:#fff;}
+.act-paid{background:rgba(16,185,129,0.1);color:var(--green2);border:1px solid rgba(16,185,129,0.3);}
+.act-paid:hover{background:var(--green);color:#fff;}
+.act-done{background:rgba(16,185,129,0.1);color:var(--green2);border:1px solid rgba(16,185,129,0.3);}
+.act-done:hover{background:var(--green);color:#fff;}
+.act-del{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.act-del:hover{background:var(--red);color:#fff;}
+.act-proof{background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.25);}
+.act-proof:hover{background:var(--gold);color:#fff;}
+
+/* ── SEARCH / FILTER ── */
+.search-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:8px 12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;outline:none;transition:border .15s;margin-bottom:10px;}
+.search-input:focus{border-color:var(--primary);}
+.search-input::placeholder{color:var(--text3);}
+.filter-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.filter-btn{font-size:0.7rem;font-weight:600;padding:4px 11px;border-radius:20px;border:1px solid var(--border);color:var(--text3);background:transparent;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;}
+.filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.filter-btn:hover:not(.active){border-color:var(--border2);color:var(--text2);}
+
+/* ── VOUCHER PANEL ── */
+.voucher-textarea{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:'Space Grotesk',monospace;font-size:0.82rem;outline:none;resize:vertical;min-height:80px;line-height:1.9;letter-spacing:.5px;transition:border .15s;}
+.voucher-textarea:focus{border-color:var(--primary);}
+.voucher-textarea::placeholder{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0;color:var(--text3);font-size:0.75rem;}
+.add-btn{background:var(--primary);color:#fff;border:none;border-radius:9px;padding:10px 15px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.add-btn:hover{background:var(--primary2);transform:translateY(-1px);}
+.voucher-list{display:flex;flex-direction:column;gap:5px;max-height:290px;overflow-y:auto;margin-top:10px;}
+.voucher-item{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 11px;}
+.voucher-code{font-family:'Space Grotesk',monospace;font-size:0.8rem;font-weight:600;color:var(--text);flex:1;letter-spacing:.5px;}
+.vbadge{font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.vb-av{background:rgba(16,185,129,0.15);color:var(--green2);border:1px solid rgba(16,185,129,0.3);}
+.vb-used{background:rgba(100,116,139,0.15);color:var(--text3);border:1px solid rgba(100,116,139,0.3);}
+.vbtn{width:22px;height:22px;border-radius:5px;border:none;cursor:pointer;background:rgba(239,68,68,0.1);color:var(--red);font-size:0.7rem;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.vbtn:hover{background:var(--red);color:#fff;}
+
+/* ── TOGGLE ── */
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 13px;margin-bottom:8px;}
+.toggle-info .tl{font-size:0.8rem;font-weight:600;color:var(--text);}
+.toggle-info .ts{font-size:0.65rem;color:var(--text3);margin-top:1px;}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;}
+.tog-slider{position:absolute;inset:0;background:var(--border2);border-radius:11px;cursor:pointer;transition:all .3s;}
+.tog-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:all .3s;}
+.tog input:checked + .tog-slider{background:var(--green);}
+.tog input:checked + .tog-slider::before{transform:translateX(18px);}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(5px);}
+.mbox{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px;max-width:460px;width:100%;box-shadow:var(--shadow);animation:sU .28s ease;max-height:90vh;overflow-y:auto;}
+@keyframes sU{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.mtitle{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.msub{font-size:0.76rem;color:var(--text2);margin-bottom:14px;line-height:1.5;}
+.mlabel{font-size:0.63rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;margin-top:10px;}
+.minput{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Space Grotesk',monospace;font-size:0.88rem;outline:none;transition:border .15s;text-transform:uppercase;letter-spacing:1px;}
+.minput:focus{border-color:var(--primary);}
+.murl{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:0.7rem;color:var(--primary2);word-break:break-all;margin-top:6px;font-family:'Space Grotesk',monospace;cursor:pointer;transition:border .15s;}
+.murl:hover{border-color:var(--primary);}
+.minfo{background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.18);border-radius:8px;padding:9px 12px;font-size:0.72rem;color:var(--text2);line-height:1.6;margin-top:10px;}
+.mactions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;}
+.mbtn{flex:1;min-width:80px;padding:10px;border-radius:8px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:700;transition:all .2s;}
+.mbtn-primary{background:var(--primary);color:#fff;}
+.mbtn-primary:hover{background:var(--primary2);}
+.mbtn-green{background:var(--green);color:#fff;}
+.mbtn-green:hover{background:var(--green2);}
+.mbtn-purple{background:var(--purple);color:#fff;}
+.mbtn-cancel{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.mbtn-cancel:hover{color:var(--text);}
+
+/* ── ORDER DETAIL MODAL ── */
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(51,65,85,0.5);font-size:0.78rem;}
+.detail-row:last-child{border:none;}
+.dk{color:var(--text3);}
+.dv{font-weight:600;color:var(--text);}
+.proof-img{width:100%;border-radius:10px;border:2px solid var(--border);margin-top:8px;max-height:300px;object-fit:contain;background:var(--bg3);}
+
+/* ── MANUAL PROSES ── */
+.manual-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;outline:none;transition:border .15s;margin-bottom:8px;}
+.manual-input:focus{border-color:var(--primary);}
+.manual-input::placeholder{color:var(--text3);}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:28px;color:var(--text3);font-size:0.8rem;}
+.empty-icon{font-size:2.2rem;margin-bottom:7px;}
+
+/* ── LOADING ── */
+.loading-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.82);z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;backdrop-filter:blur(4px);}
+.loading-overlay.show{display:flex;}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:0.8rem;color:var(--text2);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 16px;font-size:0.78rem;font-weight:600;color:var(--text);z-index:999;transition:transform .25s;white-space:nowrap;box-shadow:var(--shadow);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{background:#064E3B;border-color:var(--green);color:var(--green2);}
+.toast.err{background:#450A0A;border-color:var(--red);color:#FCA5A5;}
+
+/* ── REVENUE CHART ── */
+.rev-bars{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px;}
+.rev-bar{flex:1;background:var(--primary3);border-radius:3px 3px 0 0;min-height:4px;transition:all .3s;cursor:default;position:relative;}
+.rev-bar:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;font-size:0.6rem;color:var(--text);white-space:nowrap;pointer-events:none;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 32px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.login-logo{font-size:1.5rem;font-weight:900;color:var(--text);margin-bottom:6px;letter-spacing:-0.5px;}
+.login-logo em{font-style:normal;color:var(--primary);}
+.login-sub{font-size:0.75rem;color:var(--text3);margin-bottom:28px;}
+.login-label{font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;text-align:left;margin-bottom:5px;}
+.login-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;outline:none;transition:border .2s;margin-bottom:14px;}
+.login-input:focus{border-color:var(--primary);}
+.login-input::placeholder{color:var(--text3);}
+.login-btn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;}
+.login-btn:hover{background:var(--primary2);transform:translateY(-1px);}
+.login-err{font-size:0.75rem;color:var(--red);margin-top:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;display:none;}
+.login-err.show{display:block;}
+.login-shake{animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.login-expired{font-size:0.72rem;color:var(--gold);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:8px 12px;margin-bottom:16px;display:none;}
+.login-expired.show{display:block;}
+.login-timer{font-size:0.62rem;color:var(--text3);margin-top:8px;}
+.login-timer span{color:var(--green2);font-weight:700;}
+
+/* ── VOUCHER GAME TABS ── */
+.vtab-bar{display:flex;gap:0;margin-bottom:12px;border-radius:9px;overflow:hidden;border:1px solid var(--border);}
+.vtab{flex:1;padding:8px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;text-align:center;background:var(--bg3);color:var(--text3);border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;}
+.vtab.active.ff{background:#FF4500;color:#fff;}
+.vtab.active.ml{background:#1E90FF;color:#fff;}
+.vtab:not(.active):hover{color:var(--text2);}
+.vgame-badge{display:inline-block;font-size:0.55rem;font-weight:700;padding:2px 6px;border-radius:20px;margin-left:4px;vertical-align:middle;}
+.vgame-ff{background:rgba(255,69,0,0.15);color:#FF6B35;border:1px solid rgba(255,69,0,0.3);}
+.vgame-ml{background:rgba(30,144,255,0.15);color:#60A5FA;border:1px solid rgba(30,144,255,0.3);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box" id="login-box">
+    <div class="login-logo"><em>ONE</em> TopUp</div>
+    <div class="login-sub">Admin Dashboard — Masukkan password untuk lanjut</div>
+    <div class="login-expired" id="login-expired">⏰ Sesi habis (1 jam). Masukkan password lagi.</div>
+    <div class="login-label">Password Admin</div>
+    <input class="login-input" id="login-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 Masuk ke Dashboard</button>
+    <div class="login-err" id="login-err">❌ Password salah! Coba lagi.</div>
+    <div class="login-timer" id="login-timer" style="display:none">✓ Sesi aktif — otomatis logout dalam <span id="timer-countdown">60:00</span></div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Memproses...</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo"><em>ONE</em> TopUp — Admin</div>
+  <nav class="nav-links">
+    <a href="admin.html" class="nav-link active">📊 Dashboard</a>
+    <a href="promo.html" class="nav-link">🎯 Promo</a>
+    <a href="index.html" class="nav-link">🏪 Toko</a>
+  </nav>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <span style="font-size:0.68rem;color:var(--text3)" id="last-refresh-txt"></span>
+    <button class="btn-sm" onclick="exportCSV()">⬇️ Export CSV</button>
+    <button class="btn-sm" onclick="doRefresh()" id="refresh-btn" style="background:var(--primary3);border-color:var(--primary);color:var(--primary2);">🔄 Refresh</button>
+    <button class="btn-sm" onclick="doLogout()" style="color:var(--text3);" title="Logout">🔓</button>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="stat-wrap">
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-label">Total Order</div><div class="stat-val s-blue" id="stat-total">0</div><div class="stat-sub">Semua waktu</div></div>
+    <div class="stat-card"><div class="stat-label">Pending Bayar</div><div class="stat-val s-orange" id="stat-pending">0</div><div class="stat-sub">Menunggu konfirmasi</div></div>
+    <div class="stat-card"><div class="stat-label">Siap Diproses</div><div class="stat-val s-green" id="stat-paid">0</div><div class="stat-sub">Bayar masuk ✓</div></div>
+    <div class="stat-card"><div class="stat-label">Stok Voucher</div><div class="stat-val s-purple" id="stat-voucher">0</div><div class="stat-sub">FF: <span id="sv-ff">0</span> | ML: <span id="sv-ml">0</span></div></div>
+    <div class="stat-card"><div class="stat-label">Revenue Hari Ini</div><div class="stat-val s-gold" id="stat-revenue">0</div><div class="stat-sub">Order selesai</div></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="admin-wrap">
+
+  <!-- LEFT -->
+  <div>
+
+    <!-- ANTRIAN SIAP PROSES -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">⚡ Antrian Siap Diproses</div>
+          <div class="card-sub">Order dengan bukti bayar masuk — assign voucher lalu redeem di Dunia Games</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="add-btn" style="padding:6px 13px;font-size:0.75rem;background:var(--bg3);color:var(--text2);border:1px solid var(--border)" onclick="autoAssignAll()">⚡ Auto-Assign Semua</button>
+        </div>
+      </div>
+      <div class="card-body" id="queue-list">
+        <div class="empty"><div class="empty-icon">✅</div>Tidak ada antrian</div>
+      </div>
+    </div>
+
+    <!-- SEMUA ORDER -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">📋 Semua Transaksi</div>
+          <div class="card-sub" id="order-count-sub"></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <input class="search-input" id="search-input" placeholder="🔍 Cari Order ID, ID Game, WA, nama..." oninput="renderOrders()">
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
+          <button class="filter-btn" onclick="setFilter('Pending',this)">⏳ Pending</button>
+          <button class="filter-btn" onclick="setFilter('HasProof',this)">📎 Ada Bukti</button>
+          <button class="filter-btn" onclick="setFilter('Paid',this)">💰 Bayar</button>
+          <button class="filter-btn" onclick="setFilter('Processing',this)">⚙️ Proses</button>
+          <button class="filter-btn" onclick="setFilter('Completed',this)">✅ Selesai</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Order / Waktu</th>
+                <th>Game & Nominal</th>
+                <th>ID Game</th>
+                <th>Bayar</th>
+                <th>Harga</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="order-tbody"></tbody>
+          </table>
+        </div>
+        <div id="order-empty" class="empty" style="display:none"><div class="empty-icon">📭</div>Tidak ada order</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div>
+
+    <!-- PENGATURAN AUTO -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">⚙️ Pengaturan Auto</div></div>
+      <div class="card-body">
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="tl">Auto-Assign Voucher</div><div class="ts">Voucher langsung di-assign saat bayar masuk</div></div>
+          <label class="tog"><input type="checkbox" id="tog-auto" checked onchange="saveSettings()"><span class="tog-slider"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-info"><div class="tl">Notifikasi Telegram</div><div class="ts">Alert ke bot saat order selesai diproses</div></div>
+          <label class="tog"><input type="checkbox" id="tog-notif" checked onchange="saveSettings()"><span class="tog-slider"></span></label>
+        </div>
+        <div class="toggle-wrap" style="margin-bottom:0">
+          <div class="toggle-info"><div class="tl">Auto-Refresh 15 Detik</div><div class="ts">Dashboard update otomatis</div></div>
+          <label class="tog"><input type="checkbox" id="tog-refresh" checked onchange="toggleAutoRefresh()"><span class="tog-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOK VOUCHER -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">🎟️ Stok Voucher Dunia Games</div>
+          <div class="card-sub">Voucher dipisah per game — FF & ML</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:0.68rem;color:var(--text3)">FF: <strong style="color:#FF6B35" id="v-av-ff">0</strong> &nbsp;|&nbsp; ML: <strong style="color:#60A5FA" id="v-av-ml">0</strong></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- TABS -->
+        <div class="vtab-bar">
+          <button class="vtab active ff" id="vtab-ff" onclick="switchVTab('ff')">🔥 Free Fire <span id="vtab-ff-cnt" class="vgame-badge vgame-ff">0</span></button>
+          <button class="vtab ml" id="vtab-ml" onclick="switchVTab('ml')">⚔️ Mobile Legends <span id="vtab-ml-cnt" class="vgame-badge vgame-ml">0</span></button>
+        </div>
+        <textarea class="voucher-textarea" id="new-voucher-input" placeholder="SQ4U0RU8XCY4M8SP&#10;AB1CD2EF3GH4I5JK&#10;..."></textarea>
+        <div style="display:flex;gap:7px;margin-top:8px;margin-bottom:12px">
+          <button class="add-btn" style="flex:1" onclick="addVouchers()">+ Tambah Stok</button>
+          <button class="btn-sm" onclick="clearUsedVouchers()">🗑️ Hapus Terpakai</button>
+        </div>
+        <div style="font-size:0.63rem;color:var(--text3);margin-bottom:6px;display:flex;justify-content:space-between">
+          <span>Stok (<span id="v-av2">0</span> tersedia, <span id="v-used">0</span> terpakai)</span>
+        </div>
+        <div class="voucher-list" id="voucher-list">
+          <div class="empty" style="padding:16px"><div class="empty-icon">📭</div>Belum ada voucher</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROSES MANUAL -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">🔧 Proses Manual</div></div>
+      <div class="card-body">
+        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:8px">Masukkan Order ID + kode voucher, sistem buka link Dunia Games otomatis</div>
+        <input class="manual-input" id="man-order" placeholder="Order ID (contoh: OT12345678)" oninput="this.value=this.value.toUpperCase()">
+        <input class="manual-input" id="man-voucher" placeholder="Kode Voucher (opsional — ambil dari stok jika kosong)" oninput="this.value=this.value.toUpperCase()">
+        <button class="add-btn" style="width:100%" onclick="manualProcess()">⚡ Proses Sekarang</button>
+      </div>
+    </div>
+
+    <!-- REVENUE MINI -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">📈 Revenue 7 Hari</div></div>
+      <div class="card-body">
+        <div class="rev-bars" id="rev-bars"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px" id="rev-labels"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: ASSIGN & PROSES -->
+<div class="overlay" id="modal-assign" style="display:none" onclick="if(event.target===this)closeAssignModal()">
+  <div class="mbox">
+    <div class="mtitle">⚡ Assign Voucher & Proses</div>
+    <div class="msub" id="m-sub">Pilih voucher lalu buka link Dunia Games</div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:4px" id="m-order-info"></div>
+
+    <!-- BUKTI BAYAR (jika ada) -->
+    <div id="m-proof-section" style="display:none">
+      <div class="mlabel">📎 Bukti Bayar dari Customer</div>
+      <div id="m-proof-content"></div>
+    </div>
+
+    <div class="mlabel">Kode Voucher Dunia Games</div>
+    <input class="minput" id="m-voucher" placeholder="SQ4U0RU8XCY4M8SP" oninput="this.value=this.value.toUpperCase();updateMUrl()">
+
+    <div class="mlabel">Link Redeem</div>
+    <div class="murl" id="m-url" onclick="openDG()">Masukkan kode voucher...</div>
+
+    <div class="minfo">
+      💡 <strong>Alur:</strong> Klik "Buka Dunia Games" → website terbuka di tab baru → redeem kode → kembali ke sini → klik "Konfirmasi Selesai"
+    </div>
+
+    <div class="mactions">
+      <button class="mbtn mbtn-cancel" onclick="closeAssignModal()">Batal</button>
+      <button class="mbtn mbtn-purple" onclick="openDG()">🌐 Buka Dunia Games</button>
+      <button class="mbtn mbtn-green" onclick="confirmDone()">✅ Konfirmasi Selesai</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETAIL ORDER -->
+<div class="overlay" id="modal-detail" style="display:none" onclick="if(event.target===this)closeDetailModal()">
+  <div class="mbox">
+    <div class="mtitle">📋 Detail Order</div>
+    <div id="detail-content"></div>
+    <div class="mactions" style="margin-top:14px">
+      <button class="mbtn mbtn-cancel" onclick="closeDetailModal()">Tutup</button>
+      <button class="mbtn mbtn-primary" id="detail-action-btn" style="display:none"></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: LIHAT BUKTI BAYAR -->
+<div class="overlay" id="modal-proof" style="display:none" onclick="if(event.target===this)closeProofModal()">
+  <div class="mbox" style="max-width:500px">
+    <div class="mtitle">📎 Bukti Bayar Customer</div>
+    <div class="msub" id="proof-order-sub"></div>
+    <div id="proof-content"></div>
+    <div class="mactions" style="margin-top:14px">
+      <button class="mbtn mbtn-cancel" onclick="closeProofModal()">Tutup</button>
+      <button class="mbtn mbtn-green" id="proof-confirm-btn">✅ Konfirmasi Bayar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ────────────────────────────────────────────────────────────
+// CONFIG
+// ────────────────────────────────────────────────────────────
+const CFG = {
+  supabaseUrl: 'https://tcnratctwezzhxtrzfqo.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjbnJhdGN0d2V6emh4dHJ6ZnFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MjkzMDksImV4cCI6MjA5NTEwNTMwOX0.tc6lLDOceuv_L6mFXKRSfNYw8LJsIFYCOcETPTBulrg',
+  tgBotToken: '8530811986:AAGweu9eyUEtjWeKLdJpMtwBAKaH1sql7jY',
+  tgChatId:   '1373603810',
+  duniaGamesBase: 'https://duniagames.co.id/dg-voucher/redeem-voucher/',
+};
+
+let sb = null;
+try { sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey); } catch(e) {}
+
+// ────────────────────────────────────────────────────────────
+// LOGIN — sesi 1 jam, disimpan di localStorage
+// ────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'onetopup2024'; // ← Ganti password di sini
+const SESSION_KEY    = 'onetopup_admin_session';
+const SESSION_TTL    = 60 * 60 * 1000; // 1 jam dalam ms
+let sessionTimerInterval = null;
+
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    const expiry = Date.now() + SESSION_TTL;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ expiry }));
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('login-timer').style.display = 'block';
+    startSessionTimer();
+    init();
+  } else {
+    const box = document.getElementById('login-box');
+    const err = document.getElementById('login-err');
+    err.classList.add('show');
+    box.classList.remove('login-shake');
+    void box.offsetWidth;
+    box.classList.add('login-shake');
+    document.getElementById('login-pw').value = '';
+    document.getElementById('login-pw').focus();
+  }
+}
+
+function checkAuth() {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (raw) {
+    try {
+      const { expiry } = JSON.parse(raw);
+      if (Date.now() < expiry) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('login-timer').style.display = 'block';
+        startSessionTimer();
+        return true;
+      } else {
+        // Expired
+        localStorage.removeItem(SESSION_KEY);
+        document.getElementById('login-expired').classList.add('show');
+      }
+    } catch(e) { localStorage.removeItem(SESSION_KEY); }
+  }
+  document.getElementById('login-pw').focus();
+  return false;
+}
+
+function doLogout() {
+  localStorage.removeItem(SESSION_KEY);
+  if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+  location.reload();
+}
+
+function doRefresh() {
+  const btn = document.getElementById('refresh-btn');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  refreshOrders().then(() => {
+    btn.textContent = '🔄 Refresh';
+    btn.disabled = false;
+    toast('✅ Data diperbarui!', 'success');
+  });
+}
+
+function startSessionTimer() {
+  if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+  function tick() {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return;
+    const { expiry } = JSON.parse(raw);
+    const left = Math.max(0, expiry - Date.now());
+    const m = String(Math.floor(left / 60000)).padStart(2,'0');
+    const s = String(Math.floor((left % 60000) / 1000)).padStart(2,'0');
+    const el = document.getElementById('timer-countdown');
+    if (el) el.textContent = m + ':' + s;
+    if (left <= 0) {
+      clearInterval(sessionTimerInterval);
+      doLogout();
+    }
+  }
+  tick();
+  sessionTimerInterval = setInterval(tick, 1000);
+}
+
+// ────────────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────────────
+let allOrders = [];
+let currentFilter = 'all';
+let assigningOrderId = null;
+let autoRefreshTimer = null;
+let currentVTab = 'ff'; // active voucher tab
+const fmt  = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
+const fmtN = n => parseInt(n).toLocaleString('id-ID');
+const fmtK = n => { n = parseInt(n); return n >= 1000000 ? (n/1000000).toFixed(1)+'Jt' : n >= 1000 ? (n/1000).toFixed(0)+'K' : n; };
+
+// ────────────────────────────────────────────────────────────
+// STORAGE
+// ────────────────────────────────────────────────────────────
+const lsGet = (k,d) => { try{ return JSON.parse(localStorage.getItem(k)||'null') ?? d; }catch(e){return d;} };
+const lsSet = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+// Voucher disimpan per game
+const loadVouchersFor  = (game) => lsGet(`onetopup_voucher_${game.toLowerCase()}`, []);
+const saveVouchersFor  = (game, v) => lsSet(`onetopup_voucher_${game.toLowerCase()}`, v);
+// Backward compat helper — load all vouchers (gabungan FF+ML)
+const loadVouchers = () => [...loadVouchersFor('ff').map(v=>({...v,game:'ff'})), ...loadVouchersFor('ml').map(v=>({...v,game:'ml'}))];
+const saveSettings  = () => {
+  lsSet('onetopup_admin_settings', {
+    autoAssign:   document.getElementById('tog-auto').checked,
+    notif:        document.getElementById('tog-notif').checked,
+    autoRefresh:  document.getElementById('tog-refresh').checked,
+  });
+  toast('Pengaturan disimpan', 'success');
+};
+const loadSettings  = () => lsGet('onetopup_admin_settings', {autoAssign:true, notif:true, autoRefresh:true});
+
+function toggleAutoRefresh() {
+  saveSettings();
+  const on = document.getElementById('tog-refresh').checked;
+  if (on) startAutoRefresh(); else stopAutoRefresh();
+}
+
+// ────────────────────────────────────────────────────────────
+// LOAD ORDERS
+// ────────────────────────────────────────────────────────────
+async function loadOrders() {
+  let orders = [];
+  if (sb) {
+    try {
+      const { data } = await sb.from('orders').select('*').order('created_at',{ascending:false}).limit(300);
+      if (data) orders = data;
+    } catch(e) {}
+  }
+  const local = lsGet('onetopup_log', []);
+  const ids = new Set(orders.map(o => o.order_id));
+  local.forEach(o => { if (!ids.has(o.order_id)) orders.push(o); });
+  orders.sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+  allOrders = orders;
+}
+
+// ────────────────────────────────────────────────────────────
+// UPDATE ORDER
+// ────────────────────────────────────────────────────────────
+async function updateOrder(orderId, data) {
+  const patch = { ...data, updated_at: new Date().toISOString() };
+  if (sb) {
+    try { await sb.from('orders').update(patch).eq('order_id', orderId); } catch(e) {}
+  }
+  const log = lsGet('onetopup_log', []);
+  const i = log.findIndex(o => o.order_id === orderId);
+  if (i !== -1) { Object.assign(log[i], patch); lsSet('onetopup_log', log); }
+  const mi = allOrders.findIndex(o => o.order_id === orderId);
+  if (mi !== -1) Object.assign(allOrders[mi], patch);
+}
+
+// ────────────────────────────────────────────────────────────
+// VOUCHER TAB SWITCH
+// ────────────────────────────────────────────────────────────
+function switchVTab(game) {
+  currentVTab = game;
+  document.querySelectorAll('.vtab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('vtab-' + game);
+  tab.classList.add('active', game);
+  renderVouchers();
+}
+
+// ────────────────────────────────────────────────────────────
+// VOUCHER MANAGEMENT (game-aware: ff / ml)
+// ────────────────────────────────────────────────────────────
+function addVouchers() {
+  const raw = document.getElementById('new-voucher-input').value.trim();
+  if (!raw) { toast('Masukkan kode voucher dulu!','err'); return; }
+  const codes = raw.split(/[\n,;\s]+/).map(c=>c.trim().toUpperCase()).filter(c=>c.length>=8);
+  if (!codes.length) { toast('Format kode tidak valid!','err'); return; }
+  const existing = loadVouchersFor(currentVTab);
+  const existSet = new Set(existing.map(v=>v.code));
+  let added = 0;
+  codes.forEach(code => {
+    if (!existSet.has(code)) { existing.push({code,game:currentVTab,status:'available',addedAt:new Date().toISOString(),usedBy:null}); added++; }
+  });
+  saveVouchersFor(currentVTab, existing);
+  document.getElementById('new-voucher-input').value = '';
+  renderVouchers();
+  const gameName = currentVTab === 'ff' ? 'Free Fire' : 'Mobile Legends';
+  toast(`✅ ${added} kode ${gameName} ditambahkan!`,'success');
+}
+
+function getAvailableVoucher(game) {
+  // game: 'ff' | 'ml' | undefined (ambil semua)
+  if (game) return loadVouchersFor(game).find(v => v.status==='available') || null;
+  return loadVouchers().find(v => v.status==='available') || null;
+}
+
+function getAvailableVoucherForOrder(order) {
+  // deteksi game dari order
+  const g = (order.game||'').toLowerCase().includes('mobile') || (order.game||'').toLowerCase().includes('ml') ? 'ml' : 'ff';
+  return { voucher: getAvailableVoucher(g), game: g };
+}
+
+function markVoucherUsed(code, orderId, game) {
+  if (!game) {
+    // cari di kedua stok
+    for (const g of ['ff','ml']) {
+      const vouchers = loadVouchersFor(g);
+      const i = vouchers.findIndex(v => v.code===code);
+      if (i !== -1) { vouchers[i].status='used'; vouchers[i].usedBy=orderId; vouchers[i].usedAt=new Date().toISOString(); saveVouchersFor(g, vouchers); break; }
+    }
+  } else {
+    const vouchers = loadVouchersFor(game);
+    const i = vouchers.findIndex(v => v.code===code);
+    if (i !== -1) { vouchers[i].status='used'; vouchers[i].usedBy=orderId; vouchers[i].usedAt=new Date().toISOString(); saveVouchersFor(game, vouchers); }
+  }
+  renderVouchers();
+}
+
+function deleteVoucher(code, game) {
+  saveVouchersFor(game, loadVouchersFor(game).filter(v=>v.code!==code));
+  renderVouchers();
+}
+
+function clearUsedVouchers() {
+  for (const g of ['ff','ml']) { saveVouchersFor(g, loadVouchersFor(g).filter(v=>v.status!=='used')); }
+  renderVouchers();
+  toast('Voucher terpakai dihapus','success');
+}
+
+function renderVouchers() {
+  const ffVouchers = loadVouchersFor('ff');
+  const mlVouchers = loadVouchersFor('ml');
+  const ffAv  = ffVouchers.filter(v=>v.status==='available').length;
+  const mlAv  = mlVouchers.filter(v=>v.status==='available').length;
+  const ffUs  = ffVouchers.filter(v=>v.status==='used').length;
+  const mlUs  = mlVouchers.filter(v=>v.status==='used').length;
+  const totalAv = ffAv + mlAv;
+  const totalUs = ffUs + mlUs;
+
+  // Update counters
+  if (document.getElementById('v-av-ff')) document.getElementById('v-av-ff').textContent = ffAv;
+  if (document.getElementById('v-av-ml')) document.getElementById('v-av-ml').textContent = mlAv;
+  if (document.getElementById('vtab-ff-cnt')) document.getElementById('vtab-ff-cnt').textContent = ffAv;
+  if (document.getElementById('vtab-ml-cnt')) document.getElementById('vtab-ml-cnt').textContent = mlAv;
+  if (document.getElementById('v-av2')) document.getElementById('v-av2').textContent = totalAv;
+  if (document.getElementById('v-used')) document.getElementById('v-used').textContent = totalUs;
+  if (document.getElementById('stat-voucher')) document.getElementById('stat-voucher').textContent = totalAv;
+  if (document.getElementById('sv-ff')) document.getElementById('sv-ff').textContent = ffAv;
+  if (document.getElementById('sv-ml')) document.getElementById('sv-ml').textContent = mlAv;
+
+  // Render list untuk tab aktif
+  const current = currentVTab === 'ff' ? ffVouchers : mlVouchers;
+  const gameLabel = currentVTab === 'ff' ? '🔥 FF' : '⚔️ ML';
+  const badgeClass = currentVTab === 'ff' ? 'vgame-ff' : 'vgame-ml';
+
+  if (!current.length) {
+    document.getElementById('voucher-list').innerHTML = `<div class="empty" style="padding:14px"><div class="empty-icon">📭</div>Belum ada voucher ${gameLabel}</div>`;
+    return;
+  }
+  const sorted = [...current].sort((a,b) => a.status===b.status?0:a.status==='available'?-1:1);
+  document.getElementById('voucher-list').innerHTML = sorted.map(v=>`
+    <div class="voucher-item">
+      <span class="vgame-badge ${badgeClass}">${gameLabel}</span>
+      <div class="voucher-code">${v.code}</div>
+      ${v.status==='available'
+        ? '<span class="vbadge vb-av">✓ Tersedia</span>'
+        : `<span class="vbadge vb-used" title="${v.usedBy||''}">Terpakai</span>`}
+      ${v.status!=='used' ? `<button class="vbtn" onclick="deleteVoucher('${v.code}','${currentVTab}')">✕</button>` : ''}
+    </div>`).join('');
+}
+
+// ────────────────────────────────────────────────────────────
+// RENDER ORDERS TABLE
+// ────────────────────────────────────────────────────────────
+function renderOrders() {
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  let orders = [...allOrders];
+
+  if (currentFilter === 'HasProof') orders = orders.filter(o => o.payment_proof);
+  else if (currentFilter !== 'all') orders = orders.filter(o => o.status === currentFilter);
+  if (q) orders = orders.filter(o =>
+    (o.order_id||'').toLowerCase().includes(q) ||
+    (o.id_game||'').toLowerCase().includes(q) ||
+    (o.wa_customer||'').toLowerCase().includes(q) ||
+    (o.nickname||'').toLowerCase().includes(q) ||
+    (o.game||'').toLowerCase().includes(q)
+  );
+
+  // Stats
+  const total    = allOrders.length;
+  const pending  = allOrders.filter(o=>o.status==='Pending').length;
+  const paid     = allOrders.filter(o=>o.status==='Paid').length;
+  const todayRev = allOrders.filter(o=>o.status==='Completed' && isToday(o.created_at)).reduce((s,o)=>s+(o.price||0),0);
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-paid').textContent    = paid;
+  document.getElementById('stat-revenue').textContent = fmtK(todayRev);
+  document.getElementById('order-count-sub').textContent = `${orders.length} dari ${total} order`;
+
+  renderQueue(allOrders.filter(o => o.status==='Paid' || o.status==='Processing' || (o.status==='Pending' && o.payment_proof)));
+  renderRevenue();
+
+  const tbody = document.getElementById('order-tbody');
+  if (!orders.length) {
+    tbody.innerHTML = '';
+    document.getElementById('order-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('order-empty').style.display = 'none';
+
+  const badges = {
+    'Pending':    '<span class="badge badge-pending">⏳ Pending</span>',
+    'Paid':       '<span class="badge badge-paid">💰 Bayar</span>',
+    'Processing': '<span class="badge badge-processing">⚙️ Proses</span>',
+    'Completed':  '<span class="badge badge-done">✅ Selesai</span>',
+    'Failed':     '<span class="badge badge-failed">❌ Gagal</span>',
+  };
+
+  tbody.innerHTML = orders.map(o => {
+    const badge = badges[o.status] || `<span class="badge">${o.status||'—'}</span>`;
+    const hasProof = !!o.payment_proof;
+    const proofBadge = hasProof ? `<span class="badge badge-proof" onclick="openProofModal('${o.order_id}')" title="Lihat bukti bayar">📎 Bukti</span>` : '';
+    return `<tr>
+      <td>
+        <div class="oid">${o.order_id}</div>
+        <div style="font-size:0.62rem;color:var(--text3);margin-top:1px">${fmtDate(o.created_at)}</div>
+      </td>
+      <td><div class="ogame">${o.game||'—'}</div><div class="oamt">${fmtN(o.amt||0)} ${o.unit||'💎'} 💎</div></td>
+      <td style="font-family:'Space Grotesk',monospace;font-size:0.73rem">${o.id_game||'—'}</td>
+      <td style="font-size:0.73rem">${o.pay_method||'—'}</td>
+      <td class="oprice">${fmt(o.price||0)}</td>
+      <td>${badge} ${proofBadge}</td>
+      <td>
+        <div class="act-row">
+          ${o.status==='Pending' && hasProof ? `<button class="act-btn act-paid" onclick="markPaid('${o.order_id}')">💰 Konfirmasi</button>` : ''}
+          ${o.status==='Pending' && !hasProof ? `<button class="act-btn act-paid" onclick="markPaid('${o.order_id}')">💰 Bayar</button>` : ''}
+          ${o.status==='Paid' ? `<button class="act-btn act-process" onclick="openAssignModal('${o.order_id}')">⚡ Proses</button>` : ''}
+          ${o.status==='Processing' ? `<button class="act-btn act-done" onclick="markDone('${o.order_id}')">✅ Selesai</button>` : ''}
+          <button class="act-btn" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border)" onclick="openDetail('${o.order_id}')">🔍</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ────────────────────────────────────────────────────────────
+// RENDER QUEUE
+// ────────────────────────────────────────────────────────────
+function renderQueue(queueOrders) {
+  const el = document.getElementById('queue-list');
+  if (!queueOrders.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">✅</div>Antrian kosong</div>';
+    return;
+  }
+  const vouchers = loadVouchers();
+  el.innerHTML = queueOrders.map(o => {
+    const assigned   = vouchers.find(v => v.usedBy===o.order_id);
+    const hasVoucher = !!assigned;
+    const duniaUrl   = hasVoucher ? CFG.duniaGamesBase + assigned.code : null;
+    const hasProof   = !!o.payment_proof;
+    const isPending  = o.status === 'Pending';
+
+    return `<div class="queue-item${hasProof?' has-proof':''}">
+      <div class="queue-head">
+        <span class="queue-order-id">${o.order_id}</span>
+        <div style="display:flex;gap:5px;align-items:center">
+          ${hasProof ? '<span class="badge badge-proof" style="cursor:pointer" onclick="openProofModal(\''+o.order_id+'\')">📎 Ada Bukti</span>' : ''}
+          ${isPending ? '<span class="badge badge-pending">⏳ Pending</span>' : o.status==='Processing' ? '<span class="badge badge-processing">⚙️ Diproses</span>' : '<span class="badge badge-paid">💰 Bayar</span>'}
+        </div>
+      </div>
+      <div class="queue-info">${o.game||'—'} — ${fmtN(o.amt||0)} ${o.unit||'Diamond'} 💎</div>
+      <div class="queue-sub">
+        ID: <strong style="color:var(--text)">${o.id_game||'—'}</strong> &nbsp;|&nbsp;
+        ${o.pay_method||'—'} &nbsp;|&nbsp; ${fmt(o.price||0)} &nbsp;|&nbsp;
+        WA: ${o.wa_customer||'—'}
+      </div>
+      ${isPending && hasProof ? `
+        <div class="proof-note">💡 Customer sudah upload bukti — klik "Konfirmasi Bayar" untuk lanjut</div>
+        <div style="display:flex;gap:6px;margin-top:7px">
+          <button class="act-btn act-paid" style="flex:1;padding:8px" onclick="markPaid('${o.order_id}')">💰 Konfirmasi Bayar</button>
+          <button class="act-btn act-proof" onclick="openProofModal('${o.order_id}')">📎 Lihat Bukti</button>
+        </div>` : ''}
+      ${!isPending && hasVoucher ? `
+        <div class="queue-voucher-row">
+          <span class="queue-voucher-label">🎟️ Voucher:</span>
+          <span class="queue-voucher-code">${assigned.code}</span>
+          <a href="${duniaUrl}" target="_blank" class="queue-open-link">🌐 Buka</a>
+        </div>
+        <button class="queue-confirm-btn" onclick="markDone('${o.order_id}')">✅ Konfirmasi Selesai — Diamond Sudah Masuk</button>` : ''}
+      ${!isPending && !hasVoucher ? `
+        <div style="margin-top:8px">
+          <button class="act-btn act-process" style="width:100%;padding:9px" onclick="openAssignModal('${o.order_id}')">⚡ Assign Voucher & Proses</button>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ────────────────────────────────────────────────────────────
+// REVENUE CHART
+// ────────────────────────────────────────────────────────────
+function renderRevenue() {
+  const days = 7;
+  const data = [];
+  const labels = [];
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const dateStr = d.toISOString().slice(0,10);
+    const rev = allOrders
+      .filter(o => o.status==='Completed' && (o.created_at||'').slice(0,10)===dateStr)
+      .reduce((s,o) => s+(o.price||0), 0);
+    data.push(rev);
+    labels.push(d.toLocaleDateString('id-ID',{weekday:'short'}));
+  }
+  const maxV = Math.max(...data, 1);
+  document.getElementById('rev-bars').innerHTML = data.map((v,i) => `
+    <div class="rev-bar" style="height:${Math.max(4,(v/maxV)*60)}px;background:${v>0?'var(--primary)':'var(--primary3)'}" data-tip="${labels[i]}: ${fmt(v)}"></div>
+  `).join('');
+  document.getElementById('rev-labels').innerHTML = labels.map(l =>
+    `<span style="font-size:0.55rem;color:var(--text3);flex:1;text-align:center">${l}</span>`
+  ).join('');
+}
+
+// ────────────────────────────────────────────────────────────
+// ASSIGN MODAL
+// ────────────────────────────────────────────────────────────
+function openAssignModal(orderId) {
+  assigningOrderId = orderId;
+  const o = allOrders.find(x=>x.order_id===orderId);
+  if (!o) return;
+  document.getElementById('m-sub').textContent = `Assign voucher untuk order ${orderId}`;
+  document.getElementById('m-order-info').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="color:var(--text2);font-size:0.8rem">${o.game||'—'}</span>
+      <strong style="color:var(--primary2)">${fmtN(o.amt||0)} ${o.unit||'Diamond'} 💎</strong>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:'Space Grotesk',monospace;font-size:0.72rem;color:var(--text3)">ID: ${o.id_game||'—'} &nbsp;|&nbsp; WA: ${o.wa_customer||'—'}</span>
+      <strong style="color:var(--green2)">${fmt(o.price||0)}</strong>
+    </div>`;
+
+  // Tampilkan bukti bayar jika ada
+  const proofSec = document.getElementById('m-proof-section');
+  const proofCon = document.getElementById('m-proof-content');
+  if (o.payment_proof) {
+    proofSec.style.display = 'block';
+    proofCon.innerHTML = buildProofHTML(o);
+  } else { proofSec.style.display = 'none'; }
+
+  // Auto-fill voucher (sesuai game)
+  const { voucher: auto } = getAvailableVoucherForOrder(o);
+  document.getElementById('m-voucher').value = auto ? auto.code : '';
+  updateMUrl();
+  document.getElementById('modal-assign').style.display = 'flex';
+}
+
+function updateMUrl() {
+  const code = document.getElementById('m-voucher').value.trim().toUpperCase();
+  const el   = document.getElementById('m-url');
+  if (code.length >= 8) { el.textContent = CFG.duniaGamesBase+code; el.style.color='var(--primary2)'; }
+  else { el.textContent = 'Masukkan kode voucher...'; el.style.color='var(--text3)'; }
+}
+
+function openDG() {
+  const code = document.getElementById('m-voucher').value.trim().toUpperCase();
+  if (code.length < 8) { toast('Kode voucher tidak valid!','err'); return; }
+  window.open(CFG.duniaGamesBase+code, '_blank');
+}
+
+async function confirmDone() {
+  const code = document.getElementById('m-voucher').value.trim().toUpperCase();
+  if (!code || code.length < 8) { toast('Masukkan kode voucher dulu!','err'); return; }
+  if (!assigningOrderId) return;
+
+  showLoading('Menyimpan...');
+  markVoucherUsed(code, assigningOrderId); // will search both stok
+  await updateOrder(assigningOrderId, { status:'Completed', voucher_code:code, dunia_games_url:CFG.duniaGamesBase+code });
+
+  const s = loadSettings();
+  if (s.notif && CFG.tgBotToken) {
+    const o = allOrders.find(x=>x.order_id===assigningOrderId);
+    if (o) await sendTG(buildDoneMsg(o, code));
+  }
+  hideLoading();
+  closeAssignModal();
+  await refreshOrders();
+  toast(`✅ Order ${assigningOrderId} selesai!`,'success');
+}
+
+function closeAssignModal() {
+  document.getElementById('modal-assign').style.display = 'none';
+  assigningOrderId = null;
+}
+
+// ────────────────────────────────────────────────────────────
+// DETAIL MODAL
+// ────────────────────────────────────────────────────────────
+function openDetail(orderId) {
+  const o = allOrders.find(x=>x.order_id===orderId);
+  if (!o) return;
+  const rows = [
+    ['Order ID',       o.order_id],
+    ['Waktu',          fmtDate(o.created_at)],
+    ['Game',           o.game||'—'],
+    ['Nominal',        `${fmtN(o.amt||0)} ${o.unit||'Diamond'} 💎`],
+    ['ID Game',        o.id_game||'—'],
+    ['Nickname',       o.nickname||'—'],
+    ['No. WhatsApp',   o.wa_customer||'—'],
+    ['Metode Bayar',   o.pay_method||'—'],
+    ['Total Bayar',    fmt(o.price||0)],
+    ['Status',         o.status||'—'],
+    ['Voucher Kode',   o.voucher_code||'—'],
+    ['Dunia Games URL',o.dunia_games_url ? `<a href="${o.dunia_games_url}" target="_blank" style="color:var(--primary2);font-size:0.7rem">Buka Link</a>` : '—'],
+  ];
+  document.getElementById('detail-content').innerHTML = rows.map(([k,v])=>`
+    <div class="detail-row"><span class="dk">${k}</span><span class="dv" style="font-family:'Space Grotesk',monospace;font-size:0.76rem;text-align:right;max-width:220px">${v}</span></div>
+  `).join('') + (o.payment_proof ? `<div style="margin-top:10px">${buildProofHTML(o)}</div>` : '');
+
+  const ab = document.getElementById('detail-action-btn');
+  if (o.status === 'Paid') {
+    ab.style.display='block'; ab.textContent='⚡ Proses Order';
+    ab.onclick = () => { closeDetailModal(); openAssignModal(orderId); };
+  } else if (o.status === 'Pending' && o.payment_proof) {
+    ab.style.display='block'; ab.textContent='💰 Konfirmasi Bayar';
+    ab.onclick = () => { markPaid(orderId); closeDetailModal(); };
+  } else { ab.style.display='none'; }
+
+  document.getElementById('modal-detail').style.display = 'flex';
+}
+
+function closeDetailModal() { document.getElementById('modal-detail').style.display = 'none'; }
+
+// ────────────────────────────────────────────────────────────
+// PROOF MODAL
+// ────────────────────────────────────────────────────────────
+function openProofModal(orderId) {
+  const o = allOrders.find(x=>x.order_id===orderId);
+  if (!o || !o.payment_proof) return;
+  document.getElementById('proof-order-sub').textContent = `Order ${orderId} — ${o.game} ${fmtN(o.amt||0)} Diamond`;
+  document.getElementById('proof-content').innerHTML = buildProofHTML(o);
+  const cb = document.getElementById('proof-confirm-btn');
+  if (o.status === 'Pending') {
+    cb.style.display = 'flex'; cb.onclick = () => { markPaid(orderId); closeProofModal(); };
+  } else { cb.style.display = 'none'; }
+  document.getElementById('modal-proof').style.display = 'flex';
+}
+
+function buildProofHTML(o) {
+  if (!o.payment_proof) return '';
+  if (o.payment_proof.startsWith('data:image') || o.payment_proof.startsWith('http')) {
+    return `<img src="${o.payment_proof}" class="proof-img" alt="Bukti Bayar">`;
+  }
+  return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:0.78rem;color:var(--text2);line-height:1.6;margin-top:6px;">${o.payment_proof}</div>`;
+}
+
+function closeProofModal() { document.getElementById('modal-proof').style.display = 'none'; }
+
+// ────────────────────────────────────────────────────────────
+// QUICK ACTIONS
+// ────────────────────────────────────────────────────────────
+async function markPaid(orderId) {
+  showLoading('Mengkonfirmasi pembayaran...');
+  await updateOrder(orderId, { status:'Paid' });
+  const s = loadSettings();
+  if (s.autoAssign) {
+    const o = allOrders.find(x=>x.order_id===orderId);
+    const { voucher: v, game: g } = o ? getAvailableVoucherForOrder(o) : { voucher: null };
+    if (v) {
+      markVoucherUsed(v.code, orderId, g);
+      await updateOrder(orderId, { status:'Processing', voucher_code:v.code });
+      toast(`💰 Terkonfirmasi! Voucher ${v.code} di-assign.`,'success');
+    } else {
+      toast('💰 Terkonfirmasi! Stok voucher habis — assign manual.','success');
+    }
+  } else { toast('💰 Status → Bayar','success'); }
+  hideLoading();
+  await refreshOrders();
+}
+
+async function markDone(orderId) {
+  showLoading('Menyelesaikan order...');
+  await updateOrder(orderId, { status:'Completed' });
+  const s = loadSettings();
+  if (s.notif) {
+    const o = allOrders.find(x=>x.order_id===orderId);
+    if (o) await sendTG(buildDoneMsg(o, o.voucher_code||'—'));
+  }
+  hideLoading();
+  await refreshOrders();
+  toast(`✅ Order ${orderId} selesai!`,'success');
+}
+
+async function autoAssignAll() {
+  const paid = allOrders.filter(o=>o.status==='Paid');
+  if (!paid.length) { toast('Tidak ada order yang perlu diproses','err'); return; }
+  let assigned = 0;
+  showLoading(`Auto-assign order...`);
+  for (const o of paid) {
+    const { voucher: v, game: g } = getAvailableVoucherForOrder(o);
+    if (!v) continue;
+    markVoucherUsed(v.code, o.order_id, g);
+    await updateOrder(o.order_id, { status:'Processing', voucher_code:v.code });
+    assigned++;
+  }
+  hideLoading();
+  if (!assigned) { toast('⚠️ Stok voucher habis untuk semua game!','err'); return; }
+  await refreshOrders();
+  toast(`✅ ${assigned} order di-assign voucher!`,'success');
+}
+
+async function manualProcess() {
+  const orderId = document.getElementById('man-order').value.trim().toUpperCase();
+  let code = document.getElementById('man-voucher').value.trim().toUpperCase();
+  if (!orderId) { toast('Masukkan Order ID dulu!','err'); return; }
+  if (!code) {
+    // coba tebak game dari order
+    const o = allOrders.find(x=>x.order_id===orderId);
+    const { voucher: v } = o ? getAvailableVoucherForOrder(o) : { voucher: getAvailableVoucher() };
+    if (!v) { toast('Stok voucher habis!','err'); return; }
+    code = v.code;
+  }
+  window.open(CFG.duniaGamesBase+code,'_blank');
+  if (!allOrders.find(o=>o.order_id===orderId)) {
+    allOrders.unshift({order_id:orderId,game:'—',amt:0,unit:'Diamond',id_game:'—',status:'Paid',price:0,created_at:new Date().toISOString()});
+  }
+  openAssignModal(orderId);
+  document.getElementById('m-voucher').value = code;
+  updateMUrl();
+}
+
+// ────────────────────────────────────────────────────────────
+// EXPORT CSV
+// ────────────────────────────────────────────────────────────
+function exportCSV() {
+  const headers = ['Order ID','Game','Nominal','Unit','Harga','Metode Bayar','ID Game','Nickname','WA','Status','Voucher','Tanggal'];
+  const rows = allOrders.map(o => [
+    o.order_id, o.game||'', o.amt||0, o.unit||'Diamond', o.price||0,
+    o.pay_method||'', o.id_game||'', o.nickname||'', o.wa_customer||'',
+    o.status||'', o.voucher_code||'', (o.created_at||'').slice(0,16)
+  ]);
+  const csv = [headers, ...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href=url; a.download='onetopup-orders-'+Date.now()+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ CSV berhasil diexport!','success');
+}
+
+// ────────────────────────────────────────────────────────────
+// TELEGRAM NOTIF
+// ────────────────────────────────────────────────────────────
+async function sendTG(text) {
+  if (!CFG.tgBotToken || !CFG.tgChatId) return;
+  await fetch(`https://api.telegram.org/bot${CFG.tgBotToken}/sendMessage`,{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({chat_id:CFG.tgChatId,text,parse_mode:'Markdown'})
+  }).catch(()=>{});
+}
+
+function buildDoneMsg(o, vCode) {
+  return [
+    `✅ *DIAMOND TERKIRIM — ONE TopUp*`,
+    `━━━━━━━━━━━━━━━━━━━`,
+    `Order ID : *${o.order_id}*`,
+    `Game     : ${o.game||'—'}`,
+    `Nominal  : *${fmtN(o.amt||0)} ${o.unit||'Diamond'}* 💎`,
+    `ID Game  : *${o.id_game||'—'}*`,
+    `Voucher  : \`${vCode}\``,
+    `━━━━━━━━━━━━━━━━━━━`,
+    `_Diamond sudah masuk. Terima kasih!_ 🎉`
+  ].join('\n');
+}
+
+// ────────────────────────────────────────────────────────────
+// FILTER & REFRESH
+// ────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+async function refreshOrders() {
+  await loadOrders();
+  renderOrders();
+  renderVouchers();
+  document.getElementById('last-refresh-txt').textContent = new Date().toLocaleTimeString('id-ID');
+}
+
+function startAutoRefresh() { stopAutoRefresh(); autoRefreshTimer=setInterval(refreshOrders,15000); }
+function stopAutoRefresh()  { if(autoRefreshTimer){clearInterval(autoRefreshTimer);autoRefreshTimer=null;} }
+
+// ────────────────────────────────────────────────────────────
+// HELPERS
+// ────────────────────────────────────────────────────────────
+const isToday = iso => iso && new Date(iso).toDateString()===new Date().toDateString();
+const fmtDate = iso => { if(!iso) return '—'; return new Date(iso).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); };
+
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+function showLoading(txt){ document.getElementById('loading-text').textContent=txt; document.getElementById('loading').classList.add('show'); }
+function hideLoading(){ document.getElementById('loading').classList.remove('show'); }
+
+// ────────────────────────────────────────────────────────────
+// SUPABASE REALTIME
+// ────────────────────────────────────────────────────────────
+function setupRealtime() {
+  if (!sb) return;
+  try {
+    sb.channel('orders-channel')
+      .on('postgres_changes', { event:'INSERT', schema:'public', table:'orders' }, async (payload) => {
+        allOrders.unshift(payload.new);
+        renderOrders(); renderVouchers();
+        const o = payload.new;
+        toast(`🔔 Order baru: ${o.game} ${fmtN(o.amt)}💎 dari ${o.wa_customer||'—'}`,'success');
+        const s = loadSettings();
+        if (s.autoAssign) {
+          const { voucher: v, game: g } = getAvailableVoucherForOrder(o);
+          if (v && o.status==='Paid') {
+            markVoucherUsed(v.code, o.order_id, g);
+            await updateOrder(o.order_id, {status:'Processing', voucher_code:v.code});
+            renderOrders();
+          }
+        }
+      })
+      .on('postgres_changes', { event:'UPDATE', schema:'public', table:'orders' }, (payload) => {
+        const i = allOrders.findIndex(x=>x.order_id===payload.new.order_id);
+        if (i!==-1) allOrders[i] = payload.new; else allOrders.unshift(payload.new);
+        renderOrders();
+      })
+      .subscribe();
+  } catch(e) {}
+}
+
+// ────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────
+async function init() {
+  const s = loadSettings();
+  document.getElementById('tog-auto').checked    = s.autoAssign;
+  document.getElementById('tog-notif').checked   = s.notif;
+  document.getElementById('tog-refresh').checked = s.autoRefresh !== false;
+  await refreshOrders();
+  if (s.autoRefresh !== false) startAutoRefresh();
+  setupRealtime();
+}
+
+document.getElementById('new-voucher-input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.ctrlKey) addVouchers(); });
+
+// Cek apakah sudah login dengan sesi valid
+checkAuth() && true; // checkAuth() sudah panggil init() di dalamnya jika valid
+</script>
+</body>
+</html>

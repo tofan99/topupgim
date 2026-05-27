@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONE TopUp — Promo Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0F172A;--bg2:#1E293B;--bg3:#253047;--border:#334155;--border2:#475569;
+  --primary:#3B82F6;--primary2:#60A5FA;--primary3:rgba(59,130,246,0.12);
+  --gold:#F59E0B;--green:#10B981;--green2:#34D399;--red:#EF4444;--orange:#F97316;--purple:#8B5CF6;
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;--shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+.topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:1rem;font-weight:800;color:var(--text);}
+.topbar-logo em{font-style:normal;color:var(--primary);}
+.nav-links{display:flex;gap:4px;}
+.nav-link{font-size:0.78rem;font-weight:500;color:var(--text2);padding:6px 11px;border-radius:7px;text-decoration:none;transition:all .15s;}
+.nav-link:hover,.nav-link.active{color:var(--text);background:var(--bg3);}
+.back-link{font-size:0.78rem;color:var(--text2);text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:8px;transition:all .15s;margin-left:auto;}
+.back-link:hover{color:var(--text);}
+
+.wrap{max-width:1100px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start;}
+@media(max-width:860px){.wrap{grid-template-columns:1fr;}}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.card-title{font-size:0.88rem;font-weight:700;color:var(--text);}
+.card-sub{font-size:0.7rem;color:var(--text3);margin-top:2px;}
+.card-body{padding:18px;}
+
+.field{margin-bottom:14px;}
+.field-label{font-size:0.67rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.field-input,.field-select,.field-textarea{
+  width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;
+  padding:10px 13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.85rem;outline:none;transition:border .15s;
+}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,0.1);}
+.field-input::placeholder,.field-textarea::placeholder{color:var(--text3);}
+.field-select option{background:var(--bg2);}
+.field-textarea{resize:vertical;min-height:70px;line-height:1.5;}
+.field-hint{font-size:0.65rem;color:var(--text3);margin-top:4px;}
+
+.type-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.type-btn{
+  padding:8px 4px;border-radius:8px;border:1.5px solid var(--border);
+  cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.72rem;font-weight:600;
+  color:var(--text3);background:transparent;transition:all .15s;text-align:center;
+}
+.type-btn.active-flash{background:rgba(234,88,12,0.15);border-color:#EA580C;color:#FB923C;}
+.type-btn.active-disc{background:rgba(59,130,246,0.15);border-color:var(--primary);color:var(--primary2);}
+.type-btn.active-bonus{background:rgba(16,185,129,0.15);border-color:var(--green);color:var(--green2);}
+.type-btn.active-info{background:rgba(139,92,246,0.15);border-color:var(--purple);color:#A78BFA;}
+
+.submit-btn{
+  width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;font-weight:700;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;box-shadow:0 4px 14px rgba(59,130,246,0.25);transition:all .2s;
+}
+.submit-btn:hover{transform:translateY(-1px);}
+
+/* PREVIEW */
+.promo-preview{border-radius:12px;padding:16px;position:relative;overflow:hidden;margin-bottom:14px;min-height:110px;}
+.promo-preview.type-flash{background:linear-gradient(135deg,#7C2D12,#C2410C,#EA580C);}
+.promo-preview.type-disc{background:linear-gradient(135deg,#1E3A8A,#1D4ED8,#3B82F6);}
+.promo-preview.type-bonus{background:linear-gradient(135deg,#064E3B,#065F46,#059669);}
+.promo-preview.type-info{background:linear-gradient(135deg,#4C1D95,#6D28D9,#7C3AED);}
+.preview-deco{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:0.1;pointer-events:none;}
+.preview-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:2px 8px;font-size:0.56rem;font-weight:700;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+.preview-title{font-size:0.95rem;font-weight:800;color:#fff;margin-bottom:4px;}
+.preview-desc{font-size:0.72rem;color:rgba(255,255,255,0.65);line-height:1.45;}
+.preview-exp{font-size:0.62rem;color:rgba(255,255,255,0.45);margin-top:6px;}
+
+/* LIST */
+.promo-list{display:flex;flex-direction:column;gap:8px;}
+.promo-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;gap:12px;}
+.promo-item-color{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0;}
+.promo-item-color.flash{background:#EA580C;}
+.promo-item-color.disc{background:var(--primary);}
+.promo-item-color.bonus{background:var(--green);}
+.promo-item-color.info{background:var(--purple);}
+.promo-item-body{flex:1;min-width:0;}
+.promo-item-title{font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+.promo-item-desc{font-size:0.72rem;color:var(--text2);line-height:1.4;}
+.promo-item-meta{font-size:0.63rem;color:var(--text3);margin-top:4px;}
+.promo-item-actions{display:flex;gap:6px;flex-shrink:0;}
+.pact{
+  font-size:0.68rem;font-weight:600;padding:4px 10px;border-radius:6px;border:none;
+  cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;
+}
+.pact-toggle-on{background:rgba(16,185,129,0.12);color:var(--green2);border:1px solid rgba(16,185,129,0.3);}
+.pact-toggle-off{background:rgba(100,116,139,0.15);color:var(--text3);border:1px solid var(--border);}
+.pact-del{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.pact-del:hover{background:var(--red);color:#fff;}
+
+.badge-active{display:inline-block;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(16,185,129,0.15);color:var(--green2);border:1px solid rgba(16,185,129,0.3);margin-left:6px;}
+.badge-off{display:inline-block;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(100,116,139,0.15);color:var(--text3);border:1px solid var(--border);margin-left:6px;}
+
+.empty{text-align:center;padding:28px;color:var(--text3);font-size:0.8rem;}
+.empty-icon{font-size:2rem;margin-bottom:8px;}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 16px;font-size:0.8rem;font-weight:600;color:var(--text);z-index:999;transition:transform .25s;white-space:nowrap;box-shadow:var(--shadow);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{background:#064E3B;border-color:var(--green);color:var(--green2);}
+.toast.err{background:#450A0A;border-color:var(--red);color:#FCA5A5;}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.toggle-wrap{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.toggle{position:relative;width:38px;height:22px;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:11px;cursor:pointer;transition:all .3s;}
+.toggle-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:all .3s;}
+.toggle input:checked + .toggle-slider{background:var(--green);}
+.toggle input:checked + .toggle-slider::before{transform:translateX(16px);}
+.toggle-label{font-size:0.78rem;color:var(--text2);}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 32px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.login-logo{font-size:1.5rem;font-weight:900;color:var(--text);margin-bottom:6px;}
+.login-logo em{font-style:normal;color:var(--primary);}
+.login-sub{font-size:0.75rem;color:var(--text3);margin-bottom:28px;}
+.login-label{font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;text-align:left;margin-bottom:5px;}
+.login-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;outline:none;transition:border .2s;margin-bottom:14px;}
+.login-input:focus{border-color:var(--primary);}
+.login-input::placeholder{color:var(--text3);}
+.login-btn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;}
+.login-btn:hover{background:var(--primary2);transform:translateY(-1px);}
+.login-err{font-size:0.75rem;color:var(--red);margin-top:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;display:none;}
+.login-err.show{display:block;}
+.login-expired{font-size:0.72rem;color:var(--gold);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:8px 12px;margin-bottom:16px;display:none;}
+.login-expired.show{display:block;}
+.login-shake{animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.login-timer{font-size:0.62rem;color:var(--text3);margin-top:8px;}
+.login-timer span{color:var(--green2);font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box" id="login-box">
+    <div class="login-logo"><em>ONE</em> TopUp</div>
+    <div class="login-sub">Promo Manager — Masukkan password untuk lanjut</div>
+    <div class="login-expired" id="login-expired">⏰ Sesi habis (1 jam). Masukkan password lagi.</div>
+    <div class="login-label">Password Admin</div>
+    <input class="login-input" id="login-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 Masuk ke Promo Manager</button>
+    <div class="login-err" id="login-err">❌ Password salah! Coba lagi.</div>
+    <div class="login-timer" id="login-timer" style="display:none">✓ Sesi aktif — otomatis logout dalam <span id="timer-countdown">60:00</span></div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-logo"><em>ONE</em> TopUp</div>
+  <nav class="nav-links">
+    <a href="admin.html" class="nav-link">📊 Dashboard</a>
+    <a href="promo.html" class="nav-link active">🎯 Promo</a>
+    <a href="index.html" class="nav-link">🏪 Toko</a>
+  </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+    <button class="back-link" id="refresh-btn" onclick="doRefresh()" style="cursor:pointer;border:none;background:var(--primary3);border:1px solid var(--primary);color:var(--primary2);">🔄 Refresh</button>
+    <button class="back-link" onclick="doLogout()" style="cursor:pointer;border:none;background:transparent;color:var(--text3);" title="Logout">🔓 Logout</button>
+    <a href="index.html" class="back-link">← Toko</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- LEFT: FORM -->
+  <div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">➕ Tambah Promo Baru</div>
+          <div class="card-sub">Banner akan tampil di halaman utama toko</div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <!-- PREVIEW -->
+        <div class="field-label">Preview Banner</div>
+        <div class="promo-preview type-flash" id="preview-card">
+          <div class="preview-deco" id="preview-deco">⚡</div>
+          <div class="preview-badge" id="preview-badge">⚡ Flash Sale</div>
+          <div class="preview-title" id="preview-title">Judul Promo</div>
+          <div class="preview-desc" id="preview-desc">Deskripsi singkat promo ini...</div>
+          <div class="preview-exp" id="preview-exp" style="display:none"></div>
+        </div>
+
+        <!-- TIPE -->
+        <div class="field">
+          <div class="field-label">Tipe Promo</div>
+          <div class="type-btns">
+            <button class="type-btn active-flash" data-type="flash" onclick="setType('flash',this)">⚡ Flash</button>
+            <button class="type-btn" data-type="disc"  onclick="setType('disc',this)">🏷️ Diskon</button>
+            <button class="type-btn" data-type="bonus" onclick="setType('bonus',this)">🎁 Bonus</button>
+            <button class="type-btn" data-type="info"  onclick="setType('info',this)">📢 Info</button>
+          </div>
+        </div>
+
+        <!-- JUDUL & DESKRIPSI -->
+        <div class="field">
+          <div class="field-label">Judul <span style="color:var(--red)">*</span></div>
+          <input class="field-input" id="f-title" placeholder="Contoh: Flash Sale 50% Diamond FF!" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <div class="field-label">Deskripsi <span style="color:var(--red)">*</span></div>
+          <textarea class="field-textarea" id="f-desc" rows="2" placeholder="Contoh: Dapatkan bonus 50 diamond untuk setiap top up 500 diamond. Berlaku hari ini saja!" oninput="updatePreview()"></textarea>
+        </div>
+
+        <!-- TANGGAL KADALUARSA -->
+        <div class="field">
+          <div class="field-label">Tanggal Berakhir (opsional)</div>
+          <input class="field-input" id="f-exp" type="date" onchange="updatePreview()">
+          <div class="field-hint">Kosongkan jika promo tidak ada batas waktu</div>
+        </div>
+
+        <!-- LINK KE PAKET (opsional) -->
+        <div class="field">
+          <div class="field-label">Link ke Paket (opsional)</div>
+          <div class="row2">
+            <div>
+              <select class="field-select" id="f-game" onchange="renderPkgOptions()">
+                <option value="">— Pilih Game —</option>
+                <option value="ff">Free Fire</option>
+                <option value="ml">Mobile Legends</option>
+              </select>
+            </div>
+            <div>
+              <select class="field-select" id="f-pkg">
+                <option value="">— Pilih Paket —</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-hint">Jika diisi, banner bisa diklik dan langsung checkout paket tersebut</div>
+        </div>
+
+        <!-- AKTIF TOGGLE -->
+        <div class="field">
+          <div class="toggle-wrap">
+            <label class="toggle"><input type="checkbox" id="f-active" checked><span class="toggle-slider"></span></label>
+            <span class="toggle-label">Aktifkan promo sekarang</span>
+          </div>
+        </div>
+
+        <button class="submit-btn" onclick="addPromo()">+ Tambahkan Promo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: LIST -->
+  <div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">📋 Daftar Promo</div>
+          <div class="card-sub" id="promo-count-sub">0 promo aktif</div>
+        </div>
+        <button onclick="clearAll()" style="font-size:0.72rem;font-weight:600;padding:5px 11px;border-radius:7px;border:1px solid rgba(239,68,68,0.3);color:var(--red);background:rgba(239,68,68,0.08);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">🗑️ Hapus Semua</button>
+      </div>
+      <div class="card-body">
+        <div class="promo-list" id="promo-list">
+          <div class="empty"><div class="empty-icon">📭</div>Belum ada promo. Tambahkan dari form di kiri.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANDUAN -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">💡 Panduan Promo</div></div>
+      <div class="card-body" style="font-size:0.78rem;color:var(--text2);line-height:1.9;">
+        <div style="margin-bottom:8px">📌 <strong style="color:var(--text)">Flash Sale</strong> — Untuk promo terbatas waktu (warna merah-oranye)</div>
+        <div style="margin-bottom:8px">📌 <strong style="color:var(--text)">Diskon</strong> — Untuk potongan harga (warna biru)</div>
+        <div style="margin-bottom:8px">📌 <strong style="color:var(--text)">Bonus</strong> — Untuk bonus diamond ekstra (warna hijau)</div>
+        <div style="margin-bottom:8px">📌 <strong style="color:var(--text)">Info</strong> — Untuk pengumuman/informasi (warna ungu)</div>
+        <div style="margin-bottom:8px">📌 Promo dengan <strong style="color:var(--text)">link paket</strong> akan bisa diklik customer untuk langsung checkout</div>
+        <div>📌 Promo yang sudah lewat tanggal kadaluarsa otomatis <strong style="color:var(--text)">tidak tampil</strong> di toko</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ────────────────────────────────────────────────────────────
+// LOGIN — sesi 1 jam (shared key dengan admin.html)
+// ────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD  = 'onetopup2024'; // ← Sama dengan admin.html
+const SESSION_KEY     = 'onetopup_admin_session';
+const SESSION_TTL     = 60 * 60 * 1000;
+let sessionTimerInterval = null;
+
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    const expiry = Date.now() + SESSION_TTL;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ expiry }));
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('login-timer').style.display = 'block';
+    startSessionTimer();
+  } else {
+    const box = document.getElementById('login-box');
+    document.getElementById('login-err').classList.add('show');
+    box.classList.remove('login-shake');
+    void box.offsetWidth;
+    box.classList.add('login-shake');
+    document.getElementById('login-pw').value = '';
+    document.getElementById('login-pw').focus();
+  }
+}
+
+function checkAuth() {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (raw) {
+    try {
+      const { expiry } = JSON.parse(raw);
+      if (Date.now() < expiry) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('login-timer').style.display = 'block';
+        startSessionTimer();
+        return true;
+      } else {
+        localStorage.removeItem(SESSION_KEY);
+        document.getElementById('login-expired').classList.add('show');
+      }
+    } catch(e) { localStorage.removeItem(SESSION_KEY); }
+  }
+  document.getElementById('login-pw').focus();
+  return false;
+}
+
+function doLogout() {
+  localStorage.removeItem(SESSION_KEY);
+  if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+  location.reload();
+}
+
+function doRefresh() {
+  const btn = document.getElementById('refresh-btn');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  renderList();
+  setTimeout(() => { btn.textContent = '🔄 Refresh'; btn.disabled = false; toast('✅ Data diperbarui!', 'success'); }, 300);
+}
+
+function startSessionTimer() {
+  if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+  function tick() {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return;
+    const { expiry } = JSON.parse(raw);
+    const left = Math.max(0, expiry - Date.now());
+    const m = String(Math.floor(left / 60000)).padStart(2,'0');
+    const s = String(Math.floor((left % 60000) / 1000)).padStart(2,'0');
+    const el = document.getElementById('timer-countdown');
+    if (el) el.textContent = m + ':' + s;
+    if (left <= 0) { clearInterval(sessionTimerInterval); doLogout(); }
+  }
+  tick();
+  sessionTimerInterval = setInterval(tick, 1000);
+}
+
+const GAMES_DATA = {
+  ff: { name:'Free Fire', pkgs:[
+    {id:'ff-50',label:'50 Diamond — Rp 5.000'},
+    {id:'ff-100',label:'100 Diamond — Rp 12.000'},
+    {id:'ff-150',label:'150 Diamond — Rp 20.000'},
+    {id:'ff-350',label:'350 Diamond — Rp 40.000'},
+    {id:'ff-500',label:'500 Diamond — Rp 65.000'},
+    {id:'ff-750',label:'750 Diamond — Rp 90.000'},
+    {id:'ff-1000',label:'1000 Diamond — Rp 120.000'},
+    {id:'ff-1450',label:'1450 Diamond — Rp 165.000'},
+    {id:'ff-1800',label:'1800 Diamond — Rp 235.000'},
+    {id:'ff-2200',label:'2200 Diamond — Rp 275.000'},
+    {id:'ff-3650',label:'3650 Diamond — Rp 440.000'},
+  ]},
+  ml: { name:'Mobile Legends', pkgs:[
+    {id:'ml-24',label:'24 Diamond — Rp 5.000'},
+    {id:'ml-48',label:'48 Diamond — Rp 11.000'},
+    {id:'ml-72',label:'72 Diamond — Rp 17.000'},
+    {id:'ml-120',label:'120 Diamond — Rp 38.000'},
+    {id:'ml-240',label:'240 Diamond — Rp 70.000'},
+    {id:'ml-480',label:'480 Diamond — Rp 135.000'},
+    {id:'ml-720',label:'720 Diamond — Rp 210.000'},
+    {id:'ml-1200',label:'1200 Diamond — Rp 305.000'},
+    {id:'ml-1920',label:'1920 Diamond — Rp 487.000'},
+    {id:'ml-2400',label:'2400 Diamond — Rp 610.000'},
+  ]}
+};
+
+const EMOJI = { flash:'⚡', disc:'🏷️', bonus:'🎁', info:'📢' };
+const LABEL = { flash:'Flash Sale', disc:'Diskon', bonus:'Bonus', info:'Info' };
+let currentType = 'flash';
+
+function setType(t, btn) {
+  currentType = t;
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.className = 'type-btn';
+    if (b.dataset.type === t) b.className = `type-btn active-${t}`;
+  });
+  updatePreview();
+}
+
+function updatePreview() {
+  const title = document.getElementById('f-title').value || 'Judul Promo';
+  const desc  = document.getElementById('f-desc').value  || 'Deskripsi singkat promo ini...';
+  const exp   = document.getElementById('f-exp').value;
+  const card  = document.getElementById('preview-card');
+  card.className = `promo-preview type-${currentType}`;
+  document.getElementById('preview-deco').textContent  = EMOJI[currentType];
+  document.getElementById('preview-badge').textContent = EMOJI[currentType]+' '+LABEL[currentType];
+  document.getElementById('preview-title').textContent = title;
+  document.getElementById('preview-desc').textContent  = desc;
+  const expEl = document.getElementById('preview-exp');
+  if (exp) {
+    expEl.style.display = 'block';
+    expEl.textContent = '⏳ Berlaku s/d ' + new Date(exp).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  } else {
+    expEl.style.display = 'none';
+  }
+}
+
+function renderPkgOptions() {
+  const game = document.getElementById('f-game').value;
+  const sel  = document.getElementById('f-pkg');
+  sel.innerHTML = '<option value="">— Pilih Paket —</option>';
+  if (!game) return;
+  GAMES_DATA[game].pkgs.forEach(p => {
+    sel.innerHTML += `<option value="${p.id}">${p.label}</option>`;
+  });
+}
+
+function addPromo() {
+  const title = document.getElementById('f-title').value.trim();
+  const desc  = document.getElementById('f-desc').value.trim();
+  if (!title) { toast('Judul promo wajib diisi!','err'); return; }
+  if (!desc)  { toast('Deskripsi promo wajib diisi!','err'); return; }
+
+  const promo = {
+    id:       Date.now().toString(),
+    type:     currentType,
+    title,
+    desc,
+    expDate:  document.getElementById('f-exp').value || null,
+    linkGame: document.getElementById('f-game').value || null,
+    linkPkg:  document.getElementById('f-pkg').value  || null,
+    active:   document.getElementById('f-active').checked,
+    createdAt:new Date().toISOString(),
+  };
+
+  const promos = loadPromos();
+  promos.unshift(promo);
+  savePromos(promos);
+  renderList();
+
+  // Reset form
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-desc').value  = '';
+  document.getElementById('f-exp').value   = '';
+  document.getElementById('f-game').value  = '';
+  document.getElementById('f-pkg').value   = '';
+  document.getElementById('f-active').checked = true;
+  updatePreview();
+  toast('✅ Promo berhasil ditambahkan!','success');
+}
+
+function togglePromo(id) {
+  const promos = loadPromos();
+  const idx = promos.findIndex(p => p.id === id);
+  if (idx !== -1) { promos[idx].active = !promos[idx].active; savePromos(promos); }
+  renderList();
+}
+
+function deletePromo(id) {
+  if (!confirm('Hapus promo ini?')) return;
+  savePromos(loadPromos().filter(p => p.id !== id));
+  renderList();
+  toast('Promo dihapus');
+}
+
+function clearAll() {
+  if (!confirm('Hapus SEMUA promo?')) return;
+  savePromos([]);
+  renderList();
+  toast('Semua promo dihapus');
+}
+
+function renderList() {
+  const promos = loadPromos();
+  const active = promos.filter(p => p.active && (!p.expDate || new Date(p.expDate) >= new Date())).length;
+  document.getElementById('promo-count-sub').textContent = `${active} promo aktif dari ${promos.length} total`;
+
+  if (!promos.length) {
+    document.getElementById('promo-list').innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Belum ada promo. Tambahkan dari form di kiri.</div>';
+    return;
+  }
+  document.getElementById('promo-list').innerHTML = promos.map(p => {
+    const expired = p.expDate && new Date(p.expDate) < new Date();
+    const statusBadge = expired ? '<span class="badge-off">Kadaluarsa</span>' : (p.active ? '<span class="badge-active">Aktif</span>' : '<span class="badge-off">Nonaktif</span>');
+    return `<div class="promo-item">
+      <div class="promo-item-color ${p.type}"></div>
+      <div class="promo-item-body">
+        <div class="promo-item-title">${EMOJI[p.type]} ${p.title} ${statusBadge}</div>
+        <div class="promo-item-desc">${p.desc}</div>
+        <div class="promo-item-meta">
+          ${p.expDate ? '⏳ s/d '+new Date(p.expDate).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})+' &nbsp;|&nbsp; ' : ''}
+          ${p.linkGame ? '🔗 '+p.linkGame.toUpperCase()+' → '+p.linkPkg : ''}
+          &nbsp;|&nbsp; ${new Date(p.createdAt).toLocaleDateString('id-ID')}
+        </div>
+      </div>
+      <div class="promo-item-actions">
+        ${!expired ? `<button class="pact ${p.active?'pact-toggle-on':'pact-toggle-off'}" onclick="togglePromo('${p.id}')">${p.active?'✓ On':'Off'}</button>` : ''}
+        <button class="pact pact-del" onclick="deletePromo('${p.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadPromos() { return JSON.parse(localStorage.getItem('onetopup_promos')||'[]'); }
+function savePromos(p) { localStorage.setItem('onetopup_promos', JSON.stringify(p)); }
+
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show'+(type?' '+type:'');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// Cek sesi saat halaman dibuka
+checkAuth();
+renderList();
+updatePreview();
+</script>
+</body>
+</html>
